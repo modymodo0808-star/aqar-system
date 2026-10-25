@@ -106,17 +106,31 @@ async function addTodo() {
 }
 async function removeTodo(id) { await DataAPI.deleteTodo(id); await renderTodos(); }
 
+// ==========================================
+// دالة البحث المحدثة (بالمساحة والسعر)
+// ==========================================
 async function renderUnits() {
-  const search = (document.getElementById('unitSearch')?.value || '').toLowerCase();
+  const search = (document.getElementById('unitSearch')?.value || '').trim().toLowerCase();
   const fStatus = document.getElementById('unitFilterStatus')?.value || '';
   const fDeal = document.getElementById('unitFilterDeal')?.value || '';
   let units = await DataAPI.getUnits();
   
-  if (search) units = units.filter(u => u.project.toLowerCase().includes(search) || u.area.toLowerCase().includes(search) || String(u.id).includes(search));
+  if (search) {
+    units = units.filter(u => {
+      // لو المستخدم كتب أرقام، نبحث في المساحة أو السعر
+      if (!isNaN(search) && search !== '') {
+        return String(u.size).includes(search) || String(u.price).includes(search);
+      }
+      // بحث عادي بالكلام في المشروع، المنطقة، أو الكود
+      return u.project.toLowerCase().includes(search) || 
+             u.area.toLowerCase().includes(search) || 
+             String(u.id).includes(search);
+    });
+  }
+
   if (fStatus) units = units.filter(u => u.status === fStatus);
   if (fDeal) units = units.filter(u => u.dealType === fDeal);
 
-  // إظهار أزرار التعديل والحذف للمدير فقط
   const actionButtons = (id) => {
     if (currentUser.role === 'admin') {
       return `

@@ -110,7 +110,8 @@
     <section id="page-units" class="page hidden">
       <div class="card">
         <div class="toolbar">
-          <input type="text" id="unitSearch" placeholder="🔍 بحث بالكود، المشروع، المنطقة..." oninput="renderUnits()">
+          <!-- تم تعديل النص هنا عشان يوضح البحث بالمساحة والسعر -->
+          <input type="text" id="unitSearch" placeholder="🔍 بحث بالكود، المشروع، المنطقة، المساحة، أو السعر..." oninput="renderUnits()">
           <select id="unitFilterStatus" onchange="renderUnits()">
             <option value="">كل الحالات</option>
             <option value="متاحة">متاحة</option>
@@ -123,7 +124,6 @@
             <option value="بيع">بيع فقط</option>
             <option value="إيجار">إيجار فقط</option>
           </select>
-          <!-- تم شيل كلمة admin-only عشان السيلز يقدر يضيف -->
           <button class="btn-primary" onclick="openUnitForm()">➕ إضافة عقار</button>
         </div>
         <table class="table">
