@@ -110,7 +110,6 @@
     <section id="page-units" class="page hidden">
       <div class="card">
         <div class="toolbar">
-          <!-- تم تعديل النص هنا عشان يوضح البحث بالمساحة والسعر -->
           <input type="text" id="unitSearch" placeholder="🔍 بحث بالكود، المشروع، المنطقة، المساحة، أو السعر..." oninput="renderUnits()">
           <select id="unitFilterStatus" onchange="renderUnits()">
             <option value="">كل الحالات</option>
@@ -156,10 +155,8 @@
           <input type="text" id="clientSearch" placeholder="🔍 بحث بالاسم أو الموبايل..." oninput="renderClients()">
           <button class="btn-primary" onclick="openClientForm()">➕ إضافة عميل</button>
         </div>
-        <table class="table">
-          <thead><tr><th>الكود</th><th>الاسم</th><th>الموبايل</th><th>النوع</th><th>مسؤول المتابعة</th><th>إجراءات</th></tr></thead>
-          <tbody id="clientsBody"></tbody>
-        </table>
+        <!-- الحاوية دي هنحط فيها القائمة المطوية -->
+        <div id="clientsContainer" style="margin-top: 15px;"></div>
       </div>
     </section>
 

@@ -106,9 +106,7 @@ async function addTodo() {
 }
 async function removeTodo(id) { await DataAPI.deleteTodo(id); await renderTodos(); }
 
-// ==========================================
-// دالة البحث المحدثة (بالمساحة والسعر)
-// ==========================================
+// دالة البحث بالمساحة والسعر
 async function renderUnits() {
   const search = (document.getElementById('unitSearch')?.value || '').trim().toLowerCase();
   const fStatus = document.getElementById('unitFilterStatus')?.value || '';
@@ -117,11 +115,9 @@ async function renderUnits() {
   
   if (search) {
     units = units.filter(u => {
-      // لو المستخدم كتب أرقام، نبحث في المساحة أو السعر
       if (!isNaN(search) && search !== '') {
         return String(u.size).includes(search) || String(u.price).includes(search);
       }
-      // بحث عادي بالكلام في المشروع، المنطقة، أو الكود
       return u.project.toLowerCase().includes(search) || 
              u.area.toLowerCase().includes(search) || 
              String(u.id).includes(search);
@@ -427,7 +423,7 @@ async function removeOwner(id) {
 }
 
 // ==========================================
-// دالة عرض العملاء المحدثة (تجميع حسب السيلز)
+// دالة عرض العملاء (القائمة المطوية الاحترافية)
 // ==========================================
 async function renderClients() {
   const search = (document.getElementById('clientSearch')?.value || '').toLowerCase();
@@ -435,14 +431,14 @@ async function renderClients() {
   
   if (search) clients = clients.filter(c => c.name.toLowerCase().includes(search) || c.phone.includes(search));
   
+  const container = document.getElementById('clientsContainer');
+  
   if (clients.length === 0) {
-    document.getElementById('clientsBody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:20px">لا يوجد عملاء مسجلين</td></tr>';
+    container.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:20px">لا يوجد عملاء مسجلين</div>';
     return;
   }
 
   const grouped = {};
-  const salesUsers = await DataAPI.getUsers();
-  
   for (const c of clients) {
     const assignedName = await DataAPI.getUserName(c.assignedTo);
     const key = c.assignedTo || 'unassigned';
@@ -454,35 +450,52 @@ async function renderClients() {
   for (const key in grouped) {
     const group = grouped[key];
     const count = group.clients.length;
+    const isFirst = (html === '');
     
-    html += `
-      <tr class="sales-header-row">
-        <td colspan="6">
-          <span class="badge متاحة" style="background:#e0e7ff;color:#4f46e5;border-color:#c7d2fe;">👤 ${group.name}</span>
-          <span style="color:#64748b; font-size:13px; font-weight:600;">(لديه ${count} عميل)</span>
+    let rowsHtml = group.clients.map(c => `
+      <tr>
+        <td>#${c.id ? c.id.slice(-4) : ''}</td>
+        <td><strong>${c.name}</strong></td>
+        <td>${c.phone}</td>
+        <td><span class="badge متاحة">${c.type}</span></td>
+        <td>
+          <button class="btn-view" onclick="viewClientDetails('${c.id}')">📞 المتابعة</button>
+          <button class="btn-edit" onclick="openClientForm('${c.id}')">تعديل</button>
+          <button class="btn-danger" onclick="removeClient('${c.id}')">حذف</button>
         </td>
       </tr>
+    `).join('');
+
+    html += `
+      <div class="accordion-item">
+        <div class="accordion-header ${isFirst ? 'active' : ''}" onclick="toggleAccordion(this)">
+          <div class="sales-info">
+            <span class="badge" style="background:#e0e7ff;color:#4f46e5;border:1px solid #c7d2fe;">👤 ${group.name}</span>
+            <span style="color:#64748b; font-size:13px; font-weight:600;">(لديه ${count} عميل)</span>
+          </div>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="accordion-body ${isFirst ? 'active' : ''}">
+          <table class="table">
+            <thead>
+              <tr><th>الكود</th><th>الاسم</th><th>الموبايل</th><th>النوع</th><th>إجراءات</th></tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </div>
+      </div>
     `;
-    
-    for (const c of group.clients) {
-      html += `
-        <tr class="client-row">
-          <td>#${c.id ? c.id.slice(-4) : ''}</td>
-          <td><strong>${c.name}</strong></td>
-          <td>${c.phone}</td>
-          <td><span class="badge متاحة">${c.type}</span></td>
-          <td>${group.name}</td>
-          <td>
-            <button class="btn-view" onclick="viewClientDetails('${c.id}')">📞 المتابعة</button>
-            <button class="btn-edit" onclick="openClientForm('${c.id}')">تعديل</button>
-            <button class="btn-danger" onclick="removeClient('${c.id}')">حذف</button>
-          </td>
-        </tr>
-      `;
-    }
   }
   
-  document.getElementById('clientsBody').innerHTML = html;
+  container.innerHTML = html;
+}
+
+function toggleAccordion(header) {
+  const body = header.nextElementSibling;
+  header.classList.toggle('active');
+  body.classList.toggle('active');
 }
 
 async function openClientForm(id = null) {

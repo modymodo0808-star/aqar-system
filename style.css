@@ -1,8 +1,6 @@
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
 body { background: #f0f2f5; color: #1a1a1a; }
 .hidden { display: none !important; }
-
-/* إخفاء العناصر الخاصة بالمدير */
 .admin-hidden { display: none !important; }
 
 /* تسجيل الدخول */
@@ -131,12 +129,40 @@ body { background: #f0f2f5; color: #1a1a1a; }
 input[type="file"] { background: #fff; border: 1px dashed #cbd5e1; padding: 10px; border-radius: 8px; width: 100%; cursor: pointer; }
 input[type="file"]:hover { border-color: #3b82f6; }
 
-/* تنسيق صفوف السيلز في جدول العملاء */
-.sales-header-row { background: #f8fafc !important; }
-.sales-header-row td { padding: 12px 15px !important; border-bottom: 2px solid #e2e8f0; border-top: 2px solid #e2e8f0; font-weight: 800; color: #0f172a; font-size: 15px; }
-.sales-header-row .badge { font-size: 12px; padding: 4px 10px; margin-right: 10px; }
-.client-row { background: #fff; }
-.client-row:hover { background: #fafbfc; }
+/* تنسيق القائمة المطوية للسيلز */
+.accordion-item {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,.02);
+}
+.accordion-header {
+  background: #f8fafc;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 700;
+  color: #0f172a;
+  transition: 0.2s;
+}
+.accordion-header:hover { background: #f1f5f9; }
+.accordion-header.active { background: #eff6ff; color: #2563eb; }
+.accordion-header .sales-info { display: flex; align-items: center; gap: 12px; }
+.accordion-header .badge { font-size: 12px; padding: 4px 10px; }
+.accordion-header .arrow { transition: transform 0.3s; font-size: 12px; color: #94a3b8; }
+.accordion-header.active .arrow { transform: rotate(180deg); }
+.accordion-body {
+  display: none;
+  padding: 0;
+  border-top: 1px solid #e2e8f0;
+}
+.accordion-body.active { display: block; }
+.accordion-body .table { margin: 0; border-radius: 0; box-shadow: none; }
+.accordion-body .table th { background: #fff; border-bottom: 2px solid #f1f5f9; }
 
 /* موبايل */
 @media (max-width: 992px) { .dashboard-layout { grid-template-columns: 1fr; } }
