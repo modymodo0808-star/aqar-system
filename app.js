@@ -116,6 +116,7 @@ async function renderUnits() {
   if (fStatus) units = units.filter(u => u.status === fStatus);
   if (fDeal) units = units.filter(u => u.dealType === fDeal);
 
+  // إظهار أزرار التعديل والحذف للمدير فقط
   const actionButtons = (id) => {
     if (currentUser.role === 'admin') {
       return `
@@ -438,7 +439,6 @@ async function renderClients() {
   document.getElementById('clientsBody').innerHTML = rows.join('') || '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:20px">لا يوجد عملاء مسجلين</td></tr>';
 }
 
-// الدالة دي معدلة عشان تشتغل للسيلز والمدير
 async function openClientForm(id = null) {
   let c = {};
   if (id) {
@@ -476,7 +476,7 @@ async function openClientForm(id = null) {
       assignedTo = document.getElementById('c_assignedTo').value;
       if (!assignedTo) { alert('لازم تختار مسؤول المتابعة'); return; }
     } else {
-      assignedTo = currentUser.username; // السيلز بيحط نفسه أوتوماتيك
+      assignedTo = currentUser.username;
     }
 
     const data = { 
@@ -496,7 +496,7 @@ async function openClientForm(id = null) {
     if (currentUser.role === 'admin') {
       await renderAll();
     } else {
-      await renderMyClients(); // تحديث صفحة السيلز فوراً
+      await renderMyClients();
     }
   });
 }
