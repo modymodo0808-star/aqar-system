@@ -560,7 +560,19 @@ async function openClientForm(id = null) {
   });
 }
 
-async function removeClient(id) { if (!confirm('تأكيد الحذف؟')) return; await DataAPI.deleteClient(id); await renderAll(); }
+// ==========================================
+// دالة الحذف المصلحة (بتمسح فوراً من غير تدقيق)
+// ==========================================
+async function removeClient(id) { 
+  if (!confirm('هل أنت متأكد من حذف هذا العميل نهائياً؟')) return; 
+  try {
+    await DataAPI.deleteClient(id); 
+    alert('تم حذف العميل بنجاح');
+    await renderAll(); 
+  } catch (error) {
+    alert('حدث خطأ أثناء الحذف: ' + error.message);
+  }
+}
 
 async function renderTeam() {
   const search = (document.getElementById('teamSearch')?.value || '').toLowerCase();
