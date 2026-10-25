@@ -426,31 +426,63 @@ async function removeOwner(id) {
   await renderAll(); 
 }
 
+// ==========================================
+// دالة عرض العملاء المحدثة (تجميع حسب السيلز)
+// ==========================================
 async function renderClients() {
   const search = (document.getElementById('clientSearch')?.value || '').toLowerCase();
-  let clients = await DataAPI.getClients(currentUser);
+  let clients = await DataAPI.getClients(null);
   
   if (search) clients = clients.filter(c => c.name.toLowerCase().includes(search) || c.phone.includes(search));
   
-  const rows = await Promise.all(clients.map(async c => {
+  if (clients.length === 0) {
+    document.getElementById('clientsBody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:20px">لا يوجد عملاء مسجلين</td></tr>';
+    return;
+  }
+
+  const grouped = {};
+  const salesUsers = await DataAPI.getUsers();
+  
+  for (const c of clients) {
     const assignedName = await DataAPI.getUserName(c.assignedTo);
-    return `
-      <tr>
-        <td>#${c.id ? c.id.slice(-4) : ''}</td>
-        <td><strong>${c.name}</strong></td>
-        <td>${c.phone}</td>
-        <td><span class="badge متاحة">${c.type}</span></td>
-        <td>${assignedName}</td>
-        <td>
-          <button class="btn-view" onclick="viewClientDetails('${c.id}')">📞 المتابعة</button>
-          <button class="btn-edit" onclick="openClientForm('${c.id}')">تعديل</button>
-          ${currentUser.role === 'admin' ? `<button class="btn-danger" onclick="removeClient('${c.id}')">حذف</button>` : ''}
+    const key = c.assignedTo || 'unassigned';
+    if (!grouped[key]) grouped[key] = { name: assignedName, clients: [] };
+    grouped[key].clients.push(c);
+  }
+
+  let html = '';
+  for (const key in grouped) {
+    const group = grouped[key];
+    const count = group.clients.length;
+    
+    html += `
+      <tr class="sales-header-row">
+        <td colspan="6">
+          <span class="badge متاحة" style="background:#e0e7ff;color:#4f46e5;border-color:#c7d2fe;">👤 ${group.name}</span>
+          <span style="color:#64748b; font-size:13px; font-weight:600;">(لديه ${count} عميل)</span>
         </td>
       </tr>
     `;
-  }));
+    
+    for (const c of group.clients) {
+      html += `
+        <tr class="client-row">
+          <td>#${c.id ? c.id.slice(-4) : ''}</td>
+          <td><strong>${c.name}</strong></td>
+          <td>${c.phone}</td>
+          <td><span class="badge متاحة">${c.type}</span></td>
+          <td>${group.name}</td>
+          <td>
+            <button class="btn-view" onclick="viewClientDetails('${c.id}')">📞 المتابعة</button>
+            <button class="btn-edit" onclick="openClientForm('${c.id}')">تعديل</button>
+            <button class="btn-danger" onclick="removeClient('${c.id}')">حذف</button>
+          </td>
+        </tr>
+      `;
+    }
+  }
   
-  document.getElementById('clientsBody').innerHTML = rows.join('') || '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:20px">لا يوجد عملاء مسجلين</td></tr>';
+  document.getElementById('clientsBody').innerHTML = html;
 }
 
 async function openClientForm(id = null) {
