@@ -202,8 +202,35 @@ input[type="file"]:hover { border-color: #3b82f6; }
   border-bottom: 1px solid #f1f5f9; /* خط فاصل خفيف جداً */
   padding: 12px 15px;
 }
+/* ==========================================
+   تنسيق الجدول داخل القائمة المطوية (الفاصل اللوني الواضح)
+   ========================================== */
+.accordion-body .table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
 
-/* إضافة مسافة بسيطة فوق وتحت كل عميل عشان ميبقوش ملزوقين */
-.accordion-body .table tbody tr {
-  transition: background-color 0.2s ease;
+.accordion-body .table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.accordion-body .table tbody tr:nth-child(even) {
+  background-color: #f1f5f9; /* لون رمادي أوضح شوية */
+}
+
+.accordion-body .table tbody tr:hover {
+  background-color: #e2e8f0; /* لون أوضح لما تقف بالماوس */
+}
+
+/* شيل الخطوط اللي تحت عشان مفيش حاجة تكسر الشكل */
+.accordion-body .table td {
+  border-bottom: none;
+  padding: 16px 15px; /* زيادة المساحة فوق وتحت عشان يبقى مريح */
+  font-size: 14px;
+  color: #334155;
+}
+
+/* عشان أول سطر في الجدول ميبقاش ملزوق في الهيدر */
+.accordion-body .table tbody tr:first-child td {
+  padding-top: 20px; 
 }
