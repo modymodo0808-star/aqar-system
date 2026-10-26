@@ -182,3 +182,28 @@ input[type="file"]:hover { border-color: #3b82f6; }
   .detail-image-box img { height: 250px; }
   .unit-detail-page { padding: 15px; }
 }
+/* ==========================================
+   تنسيق الجدول داخل القائمة المطوية (الفاصل اللوني)
+   ========================================== */
+.accordion-body .table tbody tr:nth-child(odd) {
+  background-color: #ffffff; /* لون الصف الفردي */
+}
+
+.accordion-body .table tbody tr:nth-child(even) {
+  background-color: #f8fafc; /* لون الصف الزوجي (رمادي فاتح جداً) */
+}
+
+.accordion-body .table tbody tr:hover {
+  background-color: #eff6ff; /* لون عند تمرير الماوس */
+}
+
+/* تحسين شكل الخلايا وشيل الخطوط اللي تحت عشان يبقى شكله كروت */
+.accordion-body .table td {
+  border-bottom: 1px solid #f1f5f9; /* خط فاصل خفيف جداً */
+  padding: 12px 15px;
+}
+
+/* إضافة مسافة بسيطة فوق وتحت كل عميل عشان ميبقوش ملزوقين */
+.accordion-body .table tbody tr {
+  transition: background-color 0.2s ease;
+}
