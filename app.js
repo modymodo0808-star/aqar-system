@@ -145,12 +145,13 @@ async function renderUnits() {
       <td>${u.size} م²</td>
       <td>${u.price.toLocaleString()}</td>
       <td><span class="badge ${u.status}">${u.status}</span></td>
+      <td class="admin-only">${u.addedBy ? u.addedBy : 'المدير'}</td>
       <td>
         <button class="btn-view" onclick="viewUnit('${u.id}')">تفاصيل</button>
         ${actionButtons(u.id)}
       </td>
     </tr>
-  `).join('') || '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:20px">لا توجد نتائج مطابقة</td></tr>';
+  `).join('') || '<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:20px">لا توجد نتائج مطابقة</td></tr>';
 }
 
 async function viewUnit(id) {
@@ -316,6 +317,7 @@ async function openUnitForm(id = null) {
     }
 
     const data = {
+      addedBy: currentUser.name, // عشان نعرف مين ضاف الشقة
       ownerId: ownerId,
       clientId: clientId || null,
       clientName: clientName,
@@ -670,10 +672,14 @@ async function viewClientDetails(id) {
   if (!c) return;
   
   const feedbacks = c.feedbacks || [];
-  const fbHTML = feedbacks.map(f => `
-    <li style="background:#f8fafc; padding:10px; border-radius:8px; margin-bottom:8px; border:1px solid #e2e8f0;">
+  // ترتيب الفيد باك من الأحدث للأقدم عشان نظهر تنبيه المتابعة الإضافية
+  const sortedFeedbacks = [...feedbacks].reverse(); 
+  
+  const fbHTML = sortedFeedbacks.map((f, index) => `
+    <li style="background:#f8fafc; padding:10px; border-radius:8px; margin-bottom:8px; border:1px solid #e2e8f0; position:relative;">
       <div style="font-weight:700; color:#0f172a;">${f.text}</div>
       <small style="color:#64748b;">بواسطة: ${f.by} - ${f.date}</small>
+      ${index === 0 && feedbacks.length > 1 ? `<span style="position:absolute; top:10px; left:10px; background:#fef2f2; color:#ef4444; font-size:11px; padding:2px 8px; border-radius:5px; border:1px solid #fca5a5;">متابعة إضافية</span>` : ''}
     </li>
   `).join('') || '<li style="color:#94a3b8; text-align:center; padding:10px;">لا يوجد متابعات مسجلة بعد.</li>';
 
