@@ -423,7 +423,7 @@ async function removeOwner(id) {
 }
 
 // ==========================================
-// دالة عرض العملاء (القائمة المطوية الاحترافية)
+// دالة عرض العملاء (القائمة المطوية الاحترافية) - محدثة
 // ==========================================
 async function renderClients() {
   const search = (document.getElementById('clientSearch')?.value || '').toLowerCase();
@@ -452,19 +452,25 @@ async function renderClients() {
     const count = group.clients.length;
     const isFirst = (html === '');
     
-    let rowsHtml = group.clients.map(c => `
-      <tr>
-        <td>#${c.id ? c.id.slice(-4) : ''}</td>
-        <td><strong>${c.name}</strong></td>
-        <td>${c.phone}</td>
-        <td><span class="badge متاحة">${c.type}</span></td>
-        <td>
-          <button class="btn-view" onclick="viewClientDetails('${c.id}')">📞 المتابعة</button>
-          <button class="btn-edit" onclick="openClientForm('${c.id}')">تعديل</button>
-          <button class="btn-danger" onclick="removeClient('${c.id}')">حذف</button>
-        </td>
-      </tr>
-    `).join('');
+    // هنا بنعمل العدّاد لكل سيلز
+    let counter = 1;
+    let rowsHtml = group.clients.map(c => {
+      const row = `
+        <tr>
+          <td>#${counter}</td>
+          <td><strong>${c.name}</strong></td>
+          <td>${c.phone}</td>
+          <td><span class="badge متاحة">${c.type}</span></td>
+          <td>
+            <button class="btn-view" onclick="viewClientDetails('${c.id}')">📞 المتابعة</button>
+            <button class="btn-edit" onclick="openClientForm('${c.id}')">تعديل</button>
+            <button class="btn-danger" onclick="removeClient('${c.id}')">حذف</button>
+          </td>
+        </tr>
+      `;
+      counter++;
+      return row;
+    }).join('');
 
     html += `
       <div class="accordion-item">
