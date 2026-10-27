@@ -1,8 +1,23 @@
-// مسح أي بيانات دخول قديمة محفوظة في المتصفح
-localStorage.clear();
-sessionStorage.clear();
+// بنجيب اليوزر من المتصفح لو كان مسجل دخول قبل كده
+let currentUser = DataAPI.getCurrentUser(); 
 
-let currentUser = null;
+window.onload = async () => {
+  // لو فيه يوزر متسجل، ندخله الموقع علطول
+  if (currentUser) {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    document.getElementById('currentUser').textContent = '👤 ' + currentUser.name;
+    
+    if (currentUser.role !== 'admin') {
+      document.querySelectorAll('.admin-only').forEach(el => el.classList.add('admin-hidden'));
+      document.querySelectorAll('.sales-only').forEach(el => el.classList.remove('admin-hidden'));
+    } else {
+      document.querySelectorAll('.sales-only').forEach(el => el.classList.add('admin-hidden'));
+    }
+    
+    await renderAll();
+  }
+};
 
 async function doLogin() {
   const u = document.getElementById('loginUser').value.trim();
@@ -24,7 +39,11 @@ async function doLogin() {
   await renderAll();
 }
 
-function doLogout() { currentUser = null; location.reload(); }
+function doLogout() { 
+  DataAPI.logout(); 
+  currentUser = null; 
+  location.reload(); 
+}
 
 document.querySelectorAll('.nav-item').forEach(a => {
   a.addEventListener('click', e => {
@@ -394,7 +413,7 @@ async function removeOwner(id) {
 }
 
 // ==========================================
-// دالة عرض العملاء (القائمة المطوية الاحترافية) - محدثة
+// دالة عرض العملاء (القائمة المطوية الاحترافية)
 // ==========================================
 async function renderClients() {
   const search = (document.getElementById('clientSearch')?.value || '').toLowerCase();

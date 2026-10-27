@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, updateDoc, getDoc, initializeFirestore, persistentLocalCache, persistentSingleTabManager } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCieRyfvV3aNcy0eeohLr2CCaUs8P7mmis",
@@ -12,7 +12,11 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+
+// تفعيل الكاش عشان يسرع الموقع وميعملش ريفرش كتير
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentSingleTabManager() })
+});
 
 async function getCollectionData(colName) {
   const querySnapshot = await getDocs(collection(db, colName));
@@ -24,11 +28,30 @@ async function getCollectionData(colName) {
 }
 
 const DataAPI = {
+  // تسجيل الدخول
   async login(username, password) {
     const users = await getCollectionData('users');
-    return users.find(u => u.username === username && u.password === password) || null;
+    const user = users.find(u => u.username === username && u.password === password);
+    if (user) {
+      // حفظ بيانات المستخدم في المتصفح عشان تفضل الجلسة مفتوحة
+      localStorage.setItem('aqar_current_user', JSON.stringify(user));
+      return user;
+    }
+    return null;
   },
   
+  // دالة بتجيب اليوزر الحالي من المتصفح
+  getCurrentUser() {
+    const userStr = localStorage.getItem('aqar_current_user');
+    return userStr ? JSON.parse(userStr) : null;
+  },
+
+  // دالة تسجيل الخروج
+  logout() {
+    localStorage.removeItem('aqar_current_user');
+  },
+  
+  // --- إدارة السيلز (Users) ---
   async getUsers() { return await getCollectionData('users'); },
   async getSalesUsers() {
     const users = await this.getUsers();
@@ -38,10 +61,17 @@ const DataAPI = {
     const users = await this.getUsers();
     return users.find(u => u.username === username)?.name || 'غير محدد';
   },
-  async addUser(userData) { await setDoc(doc(db, "users", userData.username), userData); },
-  async updateUser(username, data) { await updateDoc(doc(db, "users", username), data); },
-  async deleteUser(username) { await deleteDoc(doc(db, "users", username)); },
+  async addUser(userData) {
+    await setDoc(doc(db, "users", userData.username), userData);
+  },
+  async updateUser(username, data) {
+    await updateDoc(doc(db, "users", username), data);
+  },
+  async deleteUser(username) {
+    await deleteDoc(doc(db, "users", username));
+  },
 
+  // --- الملاك ---
   async getOwners() { return await getCollectionData('owners'); },
   async addOwner(data) {
     const newDoc = doc(collection(db, "owners"));
@@ -61,6 +91,7 @@ const DataAPI = {
     return units.filter(u => String(u.ownerId) === String(id)).length;
   },
   
+  // --- العملاء ---
   async getClients(currentUser = null) {
     let clients = await getCollectionData('clients');
     if (currentUser && currentUser.role === 'sales') {
@@ -87,6 +118,7 @@ const DataAPI = {
     }
   },
   
+  // --- الشقق ---
   async getUnits() { return await getCollectionData('units'); },
   async addUnit(data) {
     const newDoc = doc(collection(db, "units"));
@@ -96,6 +128,7 @@ const DataAPI = {
   async updateUnit(id, data) { await updateDoc(doc(db, "units", String(id)), data); },
   async deleteUnit(id) { await deleteDoc(doc(db, "units", String(id))); },
 
+  // --- المهام ---
   async getTodos() { return await getCollectionData('todos'); },
   async addTodo(text) {
     const newDoc = doc(collection(db, "todos"));
@@ -105,6 +138,7 @@ const DataAPI = {
   async deleteTodo(id) { await deleteDoc(doc(db, "todos", String(id))); }
 };
 
+// إعداد الحساب الافتراضي (للمدير) أول مرة فقط
 async function seedInitialAdmin() {
   const users = await getCollectionData('users');
   if (users.length === 0) {
