@@ -11,7 +11,7 @@ const firebaseConfig = {
   measurementId: "G-JQ0WGE3T60"
 };
 
-// تهيئة عادية جداً من غير أي تعقيدات
+// تهيئة عادية جداً
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
