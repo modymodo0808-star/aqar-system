@@ -11,7 +11,6 @@ const firebaseConfig = {
   measurementId: "G-JQ0WGE3T60"
 };
 
-// تهيئة عادية جداً
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -136,4 +135,5 @@ async function seedInitialAdmin() {
 }
 seedInitialAdmin();
 
+// أهم خطوة: بنعرف DataAPI عالمياً عشان app.js يشوفها
 window.DataAPI = DataAPI;

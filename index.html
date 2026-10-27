@@ -250,9 +250,13 @@
   </div>
 </div>
 
+<!-- هنا بنعرف المتغيرات عالمياً عشان app.js يشوفها -->
 <script type="module">
   import './data.js';
-  import './app.js';
+  // بعد ما data.js يخلص، بنحمل app.js كملف عادي عشان الدوال تشتغل مع الـ onclick
+  const script = document.createElement('script');
+  script.src = 'app.js';
+  document.body.appendChild(script);
 </script>
 </body>
 </html>
