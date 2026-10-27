@@ -175,7 +175,6 @@ async function viewUnit(id) {
   
   if (currentUser.role === 'admin') {
     document.getElementById('detailOwner').textContent = await DataAPI.getOwnerName(u.ownerId);
-    document.getElementById('detailClient').textContent = u.clientName || '—';
     document.getElementById('detailPartiesSection').classList.remove('admin-hidden');
   } else {
     document.getElementById('detailPartiesSection').classList.add('admin-hidden');
@@ -204,11 +203,11 @@ function closeUnitDetail() {
   document.getElementById('unitDetailPage').classList.add('hidden');
 }
 
+// استمارة إضافة العقار (معدلة وشيلنا منها العميل)
 async function openUnitForm(id = null) {
   const units = await DataAPI.getUnits();
   const unit = id ? units.find(u => String(u.id) === String(id)) : {};
   const owners = await DataAPI.getOwners();
-  const clients = await DataAPI.getClients(currentUser);
   
   const body = `
     <div style="background:#eff6ff;padding:15px;border-radius:10px;border:1px solid #bfdbfe; margin-bottom:10px;">
@@ -226,21 +225,6 @@ async function openUnitForm(id = null) {
           <option value="">-- اختر المالك --</option>
           ${owners.map(o => `<option value="${o.id}" ${unit.ownerId === o.id ? 'selected' : ''}>${o.name}</option>`).join('')}
         </select>
-      </div>
-      <div>
-        <label>العميل (اختياري)</label>
-        <select id="f_clientId">
-          <option value="">-- بدون عميل --</option>
-          ${clients.map(c => `<option value="${c.id}" ${unit.clientId === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}
-        </select>
-      </div>
-    </div>
-
-    <div style="background:#f0fdf4;padding:15px;border-radius:10px;border:1px solid #bbf7d0; margin-bottom:10px;">
-      <label style="margin-bottom:8px; color:#166534; font-weight:800;">أو سجل عميل جديد فوراً (اختياري):</label>
-      <div class="row">
-        <input type="text" id="f_newClientName" placeholder="اسم العميل">
-        <input type="text" id="f_newClientPhone" placeholder="رقم الموبايل">
       </div>
     </div>
 
@@ -295,8 +279,6 @@ async function openUnitForm(id = null) {
   
   openModal(id ? 'تعديل بيانات العقار' : 'إضافة عقار جديد', body, async () => {
     let ownerId = document.getElementById('f_ownerId').value;
-    let clientId = document.getElementById('f_clientId').value;
-    let clientName = '';
     
     const newOwnerName = document.getElementById('f_newOwnerName').value.trim();
     const newOwnerPhone = document.getElementById('f_newOwnerPhone').value.trim();
@@ -305,22 +287,9 @@ async function openUnitForm(id = null) {
       ownerId = newO.id;
     }
 
-    const newClientName = document.getElementById('f_newClientName').value.trim();
-    const newClientPhone = document.getElementById('f_newClientPhone').value.trim();
-    if (newClientName && newClientPhone) {
-      const newC = await DataAPI.addClient({ name: newClientName, phone: newClientPhone, type: 'مشتري', assignedTo: currentUser.username, notes: 'تم تسجيله تلقائياً' });
-      clientId = newC.id;
-      clientName = newC.name;
-    } else if (clientId) {
-      const cls = await DataAPI.getClients();
-      clientName = cls.find(c => String(c.id) === String(clientId))?.name || '';
-    }
-
     const data = {
-      addedBy: currentUser.name, // عشان نعرف مين ضاف الشقة
+      addedBy: currentUser.name,
       ownerId: ownerId,
-      clientId: clientId || null,
-      clientName: clientName,
       project: document.getElementById('f_project').value.trim(),
       area: document.getElementById('f_area').value.trim(),
       building: document.getElementById('f_building').value.trim(),
@@ -454,7 +423,6 @@ async function renderClients() {
     const count = group.clients.length;
     const isFirst = (html === '');
     
-    // هنا بنعمل العدّاد لكل سيلز
     let counter = 1;
     let rowsHtml = group.clients.map(c => {
       const row = `
@@ -672,7 +640,6 @@ async function viewClientDetails(id) {
   if (!c) return;
   
   const feedbacks = c.feedbacks || [];
-  // ترتيب الفيد باك من الأحدث للأقدم عشان نظهر تنبيه المتابعة الإضافية
   const sortedFeedbacks = [...feedbacks].reverse(); 
   
   const fbHTML = sortedFeedbacks.map((f, index) => `
