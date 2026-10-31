@@ -191,9 +191,10 @@ async function viewUnit(id) {
   document.getElementById('detailSize').textContent = u.size + ' م²';
   document.getElementById('detailRooms').textContent = u.rooms;
   document.getElementById('detailBaths').textContent = u.baths;
-  
-  if (currentUser.role === 'admin') {
+
+   if (currentUser.role === 'admin') {
     document.getElementById('detailOwner').textContent = await DataAPI.getOwnerName(u.ownerId);
+    document.getElementById('detailClient').textContent = u.clientName || '—'; // السطر الجديد
     document.getElementById('detailPartiesSection').classList.remove('admin-hidden');
   } else {
     document.getElementById('detailPartiesSection').classList.add('admin-hidden');
@@ -299,11 +300,17 @@ async function openUnitForm(id = null) {
   openModal(id ? 'تعديل بيانات العقار' : 'إضافة عقار جديد', body, async () => {
     let ownerId = document.getElementById('f_ownerId').value;
     
-    const newOwnerName = document.getElementById('f_newOwnerName').value.trim();
+       const newOwnerName = document.getElementById('f_newOwnerName').value.trim();
     const newOwnerPhone = document.getElementById('f_newOwnerPhone').value.trim();
-    if (newOwnerName && newOwnerPhone) {
-      const newO = await DataAPI.addOwner({ name: newOwnerName, phone: newOwnerPhone, nationalId: '', address: '', notes: 'تم تسجيله تلقائياً' });
-      ownerId = newO.id;
+    
+    if (newOwnerName || newOwnerPhone) {
+      if (newOwnerName.length > 2 && newOwnerName !== '.' && newOwnerName !== '-' && newOwnerPhone.length > 5) {
+        const newO = await DataAPI.addOwner({ name: newOwnerName, phone: newOwnerPhone, nationalId: '', address: '', notes: 'تم تسجيله تلقائياً' });
+        ownerId = newO.id;
+      } else {
+        alert('يرجى كتابة اسم مالك حقيقي (3 حروف على الأقل) ورقم موبايل صحيح');
+        return;
+      }
     }
 
     const data = {
