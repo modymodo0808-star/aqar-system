@@ -192,9 +192,11 @@ async function viewUnit(id) {
   document.getElementById('detailRooms').textContent = u.rooms;
   document.getElementById('detailBaths').textContent = u.baths;
 
-   if (currentUser.role === 'admin') {
-    document.getElementById('detailOwner').textContent = await DataAPI.getOwnerName(u.ownerId);
-    document.getElementById('detailClient').textContent = u.clientName || '—'; // السطر الجديد
+     if (currentUser.role === 'admin') {
+    const ownersList = await DataAPI.getOwners();
+    const ownerData = ownersList.find(o => String(o.id) === String(u.ownerId));
+    document.getElementById('detailOwner').textContent = ownerData ? ownerData.name : '—';
+    document.getElementById('detailOwnerPhone').textContent = ownerData ? ownerData.phone : '—'; // السطر ده هو الجديد
     document.getElementById('detailPartiesSection').classList.remove('admin-hidden');
   } else {
     document.getElementById('detailPartiesSection').classList.add('admin-hidden');
@@ -238,13 +240,17 @@ async function openUnitForm(id = null) {
       </div>
     </div>
 
-    <div class="row">
+       <div class="row">
       <div>
         <label>أو اختر المالك من القائمة *</label>
         <select id="f_ownerId">
           <option value="">-- اختر المالك --</option>
           ${owners.map(o => `<option value="${o.id}" ${unit.ownerId === o.id ? 'selected' : ''}>${o.name}</option>`).join('')}
         </select>
+      </div>
+      <div>
+        <label>اسم السيلز اللي جاب الشقة</label>
+        <input type="text" id="f_salesName" value="${unit.addedBy || ''}" placeholder="اكتب اسم السيلز">
       </div>
     </div>
 
@@ -314,7 +320,7 @@ async function openUnitForm(id = null) {
     }
 
     const data = {
-      addedBy: currentUser.name,
+      addedBy: document.getElementById('f_salesName')?.value.trim() || currentUser.name,
       ownerId: ownerId,
       project: document.getElementById('f_project').value.trim(),
       area: document.getElementById('f_area').value.trim(),
